@@ -12,18 +12,29 @@ var concat = require('gulp-concat');
 var tar = require('gulp-tar');
 var gzip = require('gulp-gzip');
 
+var project = {
+  name : 'sillycat-proxy',
+  version : '1.0'
+}
 
 var paths = {
   main    : 'app/app.js',
   main_dist : 'build/app.js',
   app_sources : [ 'app/**/*.js'],
-  dist_sources : ['app/**' , 'node_modules/**'],
-  gulp_dependency : ['build/del', 'build/gulp','build/gulp-**'],
+  dist_sources : ['**/*.*' ,
+                  '!dist/**',
+                  '!.git/**',
+                  '!test/**',
+                  '!gulpfile.js',
+                  '!package.json',
+                  '!README.md',
+                  '!node_modules/del/**',
+                  '!node_modules/gulp/**',
+                  '!node_modules/gulp-**/**'],
   tests   : 'test/**/*.js',
   build   : 'build/',
-  dist    : 'dist/',
-  name    : 'sillycat-proxy',
-  version : '1.0'
+  target   : 'build/' + project.name + '-' + project.version,
+  dist    : 'dist/'
 };
 
 gulp.task('clean', function(cb) {
@@ -32,16 +43,13 @@ gulp.task('clean', function(cb) {
 
 gulp.task('build', ['clean'], function() {
     return gulp.src(paths.dist_sources)
-      .pipe(gulp.dest(paths.build));
+      .pipe(gulp.dest(paths.target));
 });
 
-gulp.task('clean:build', ['build'], function(cb) {
-  del(paths.gulp_dependency, cb);
-});
 
-gulp.task('dist', ['clean:build'] ,function () {
+gulp.task('dist', ['build'] ,function () {
   return gulp.src(paths.build + '**')
-    .pipe(tar(paths.name + '-' + paths.version + '.tar'))
+    .pipe(tar(project.name + '-' + project.version + '.tar'))
     .pipe(gzip())
     .pipe(gulp.dest(paths.dist));
 });
